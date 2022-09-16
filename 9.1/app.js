@@ -5,10 +5,14 @@ const path = require("path");
 const session = require("express-session");
 const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
+const passport = require("passport");
 
 // dotenv는 최대한 위로 !!
 dotenv.config(); // 항상 닷엔브 파일은 제일 상단에 정의! db 설정파일이나 이런게 있을수 있기 때문에
 const pageRouter = require("./routes/page");
+const authRouter = require("./routes/auth");
+const { sequelize } = require("./models");
+const { initialize } = require("passport");
 
 const app = express();
 app.set("port", process.env.PORT || 8001);
@@ -17,6 +21,18 @@ nunjucks.configure("views", {
   express: app,
   watch: true,
 });
+// 시퀄라이즈 연결. 시퀄라이즈는 프로미스다.
+// 시퀄라이즈 테이블정보를 변경하면 디비쪽가서 수동으로 바꿔줘야한다.
+// force: true 하면 시퀄라이즈 테이블 변경이 일어나면 테이블을 삭제하고 다시 재생성한다.
+// 이건 실무에서는 절대 하면 안됌. 고객들정보나 실제쓰이는 정보가 다 날아간다. 조심또조심.
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log("데이터베이스 연결 성공");
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -34,8 +50,12 @@ app.use(
     },
   })
 );
+// 얘네둘은 익스프레스 세션아래에 있어야한다~!!!
+app.use(passport.initialize());
+app.use(passport.session()); // passport.session 이 실행될때 디시리얼라이즈유저가 실행이 된다.
 
 app.use("/", pageRouter);
+app.use("/auth", authRouter);
 
 // 이 미들웨어까지 넘어온거면 라우터가 없는 것이기 때문에 404임.
 // 404 에러를 처리해주기 위한 미들웨어를 만든것.
