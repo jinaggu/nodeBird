@@ -12,7 +12,7 @@ dotenv.config(); // 항상 닷엔브 파일은 제일 상단에 정의! db 설�
 const pageRouter = require("./routes/page");
 const authRouter = require("./routes/auth");
 const { sequelize } = require("./models");
-const { initialize } = require("passport");
+const passportConfig = require("./passport");
 
 const app = express();
 app.set("port", process.env.PORT || 8001);
@@ -33,6 +33,7 @@ sequelize
   .catch((err) => {
     console.error(err);
   });
+passportConfig();
 
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));

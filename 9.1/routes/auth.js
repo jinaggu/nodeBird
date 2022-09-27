@@ -29,17 +29,8 @@ router.post("/join", isNotLoggedIn, async (req, res, next) => {
   }
 });
 
-router.get("/login", isNotLoggedIn, (req, res, next) => {
-  //아이디 비밀번호를 가져와서 구현할수 있지만 그럼 코드가 너무 복잡해진다.
-  //그러므로 passport 라이브러리를 사용하면 코드가 깔끔해진다.
-  //하지만 조금 이해를 필요로 한다.
-
-  // authenticate 이거는 미들웨어다.
-  // 1. passport.authenticate("local" 여기까지 일단 실행이됌.
-  // 패스포트가 로컬스트레티지를 찾는다
+router.post("/login", isNotLoggedIn, (req, res, next) => {
   passport.authenticate("local", (authError, user, info) => {
-    // done 함수를 호출하게 되면 이제 (authError, user, info) => 여기로 온다 (콜백함수)
-    // authError 서버쪽에러, user 로그인 객체가 있는지없는지, info 로그인 실패시 메시지
     if (authError) {
       console.error(authError);
       return next(authError);
@@ -47,19 +38,14 @@ router.get("/login", isNotLoggedIn, (req, res, next) => {
     if (!user) {
       return res.redirect(`/?loginError=${info.message}`);
     }
-    // 로그인이 성공한경우 req.login을 쓴다
-    // req.login 안에 사용자 객체를 넣어줍니다
-    // req.login을 하는순간 passport index.js 로 간다.
     return req.login(user, isLoggedIn, (loginError) => {
       if (loginError) {
         console.error(loginError);
         return next(loginError); // 에러가 있었으면~ 이쪽.
       }
-      // 세션쿠키가 브라우저로 보내준다. 브라우져가 세션정보를 들고있는것. 로그인된 상태가 되는것
       return res.redirect("/"); // 에러 없으면 성공 !
     });
   })(req, res, next); // 미들웨어 내의 미들웨어에는 (req, res, next)를 붙입니다.
-  // 미들웨어 확장패턴임.
 });
 
 router.get("/logout", (req, res) => {
