@@ -68,8 +68,10 @@ router.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
+// 이걸 하는순간 카카오 홈페이지로가서 로그인을 하게된다.
 router.get("/kakao", passport.authenticate("kakao"));
 
+// 로그인을 성공하면 카카오가 밑에 유알엘로 요청하나 쏴준다.
 router.get(
   "/kakao/callback",
   passport.authenticate("kakao", {
