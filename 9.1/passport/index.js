@@ -22,7 +22,21 @@ module.exports = () => {
   // app.js 안에서 passport.session() 이 실행되면 이 디시리얼라이즈유저로 옴.
   // 그리고 session에 저장되어있는 user.id를 찾아서 id로 넘겨줌.
   passport.deserializeUser((id, done) => {
-    User.findOne({ where: { id } }) // 디비에서 찾는다.
+    User.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nick"],
+          as: "Followers",
+        },
+        {
+          model: User,
+          attributes: ["id", "nick"],
+          as: "Followings",
+        },
+      ],
+    }) // 디비에서 찾는다.
       .then((user) => done(null, user)) // 있으면 user 객체를 복구시켜줌. req.user로 접근가능하다.
       .catch((err) => done(err)); // req.isAuthenticated() 를 실행하면 여기서는 true가 나온다.
   }); // 이게 바로 패스포트 세션임.
