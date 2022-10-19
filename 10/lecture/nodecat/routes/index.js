@@ -5,7 +5,7 @@ const axios = require("axios");
 const router = express.Router();
 const URL = "http://localhost:8002/v1";
 
-axios.default.headers.origin = "http://localhost:4000"; // origin 헤더 추가
+axios.defaults.headers.origin = "http://localhost:4000"; // origin 헤더 추가
 
 // 토큰 검증을 하면서, 통신까지 하기 때문에
 // 모든 라우터에서 쓰인다, 공통으로 쓰이기 때문에 함수로 빼서 중복방지.
@@ -16,12 +16,11 @@ const request = async (req, api) => {
       const tokenResult = await axios.post(`${URL}/token`, {
         clientSecret: process.env.CLIENT_SECRET,
       });
-
       req.session.jwt = tokenResult.data.token; // 세션에 토큰 저장
-      return await axios.get(`${URL}${api}`, {
-        headers: { authorization: req.session.jwt },
-      }); // API 요청
     }
+    return await axios.get(`${URL}${api}`, {
+      headers: { authorization: req.session.jwt },
+    }); // API 요청
   } catch (error) {
     if (error.response.status === 419) {
       // 토큰시간 만료시 토큰 재발급 받기
@@ -49,7 +48,7 @@ router.get("/search/:hashtag", async (req, res, next) => {
   try {
     const result = await request(
       req,
-      `/posts/hashtag/${encodeURIComponent(req.params.hashtag)}`
+      `/posts/hashtag/${encodeURIComponent(req.params.hashtag)}` // 한글일수도 있으니 안전하게 처리.
     );
     res.json(result.data);
   } catch (error) {

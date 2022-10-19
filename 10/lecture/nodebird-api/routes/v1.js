@@ -13,17 +13,15 @@ router.post("/token", async (req, res) => {
       where: { clientSecret },
       include: {
         model: User,
-        attributes: ["nick", "id"],
+        attribute: ["nick", "id"],
       },
     });
-
     if (!domain) {
       return res.status(401).json({
         code: 401,
-        message: "등록되지 않은 도메인입니다. 먼저 도메인을 등록하세요.",
+        message: "등록되지 않은 도메인입니다. 먼저 도메인을 등록하세요",
       });
     }
-
     const token = jwt.sign(
       {
         id: domain.User.id,
@@ -32,14 +30,14 @@ router.post("/token", async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "1m", // 1분
-        issuer: "nodebird", // 누가 발급해준건지
+        issuer: "nodebird",
       }
     );
     return res.json({
       code: 200,
-      message: "토큰이 발급되었습니다.",
+      message: "토큰이 발급되었습니다",
       token,
-    }); // 보통 서버보다는 데이터베이스가 터진다..!! 서버는 여러개가 구성가능함.
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -71,19 +69,17 @@ router.get("/posts/my", verifyToken, (req, res) => {
     });
 });
 
-router.get("posts/hashtag/:title", verifyToken, async (req, res) => {
+router.get("/posts/hashtag/:title", verifyToken, async (req, res) => {
   try {
     const hashtag = await Hashtag.findOne({
       where: { title: req.params.title },
     });
-
     if (!hashtag) {
       return res.status(404).json({
         code: 404,
-        message: "검색 결과가 없습니다.",
+        message: "검색 결과가 없습니다",
       });
     }
-
     const posts = await hashtag.getPosts();
     return res.json({
       code: 200,
@@ -91,6 +87,10 @@ router.get("posts/hashtag/:title", verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: "서버 에러",
+    });
   }
 });
 
