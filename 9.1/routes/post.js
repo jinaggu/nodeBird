@@ -61,6 +61,8 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
         hashtag.map((tag) => {
           // findOrCreate는 해시태그를 찾아서 있으면 조회, 없으면 생성하는 처리이다.
           // findOrCreate를 쓰면 db가 트랜잭션을 쓴다.
+          // 원래는 if문으로 분기처리해줘야 하는것을 한방에 처리할 수 있게 됨
+          // upsert 도 마찬가지. 있으면 update, 없으면 insert 처리. 분기처리 x
           return Hashtag.findOrCreate({
             // 앞에 #을 떼주는 처리
             where: { title: tag.slice(1).toLowerCase() },
