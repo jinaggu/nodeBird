@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const session = require("express-session");
 const nunjucks = require("nunjucks");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 // dotenv는 제일 최상단에 올려놓는다. 설정프로퍼티들이 들어 있기 때문.
 dotenv.config();
@@ -13,6 +14,7 @@ const authRouter = require("./routes/auth");
 const indexRouter = require("./routes");
 const v1 = require("./routes/v1");
 const v2 = require("./routes/v2"); // 한번 버전을 내놓으면 수정을하면 안된다. 외부서비스가 고장날 수 있슴.
+// 이렇게 버전을 올려서 수정해야함.
 const { sequelize } = require("./models");
 const passportConfig = require("./passport"); // require에 폴더명만 적을경우 index.js를 가지고 온다.
 
@@ -54,6 +56,7 @@ app.use(
 // 패스포트 관련 로직은 반드시 ! session 로직 선언한 곳 뒤! 에 존재해야 한다.!!
 app.use(passport.initialize()); // 요청(request)이 들어오면 passport가 구동됨.
 app.use(passport.session()); // 앱의 session과 passport의 session과 연결.
+app.use(cors({ origin: true, Credentials: true }));
 
 app.use("/auth", authRouter);
 app.use("/", indexRouter);

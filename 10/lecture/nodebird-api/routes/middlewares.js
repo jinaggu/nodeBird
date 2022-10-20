@@ -40,7 +40,7 @@ exports.verifyToken = (req, res, next) => {
 
 exports.apiLimiter = new RateLimit({
   windowMs: 60 * 1000, // 1분
-  max: 1, // 1분동안 1번보낼수 있다.
+  max: 10, // 1분동안 1번보낼수 있다.
   delayMs: 0, // 1초, 호출간격 호출간격은 적어도 1초간격으로 해라.
   handler(req, res) {
     // 만약 제한을 어겼을 경우.

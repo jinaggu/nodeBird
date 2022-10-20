@@ -91,4 +91,9 @@ router.get("/test", async (req, res, next) => {
   }
 });
 
+router.get("/", (req, res) => {
+  // 서버에서 프론트로 중요한 키를 절대 내려주면 안됌...
+  res.render("main", { key: process.env.CLIENT_SECRET });
+});
+
 module.exports = router;

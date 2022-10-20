@@ -33,6 +33,12 @@ router.post("/token", apiLimiter, async (req, res) => {
         issuer: "nodebird",
       }
     );
+    //'*' 이거는 모든 브라우저를 허용하겠다는 것.
+    // res.setHeader("Access-Control-Allow-Origin", "*");
+    // res.setHeader('Access-Control-Allow-Origin', 'localhost:4000'); 이거는 4000번만 허용하겠다는 것
+    // res.setHeader("Access-Control-Allow-Credentials", "true"); // 이거는 쿠키까지 같이 안넘어갈때
+    // => 근데 이렇게하면 활용성이 떨어져서 npm i cors로 미들웨어를 다운받아준다.
+
     return res.json({
       code: 200,
       message: "토큰이 발급되었습니다",
