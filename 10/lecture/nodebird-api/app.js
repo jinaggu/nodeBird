@@ -12,6 +12,7 @@ dotenv.config();
 const authRouter = require("./routes/auth");
 const indexRouter = require("./routes");
 const v1 = require("./routes/v1");
+const v2 = require("./routes/v2"); // 한번 버전을 내놓으면 수정을하면 안된다. 외부서비스가 고장날 수 있슴.
 const { sequelize } = require("./models");
 const passportConfig = require("./passport"); // require에 폴더명만 적을경우 index.js를 가지고 온다.
 
@@ -57,6 +58,7 @@ app.use(passport.session()); // 앱의 session과 passport의 session과 연결.
 app.use("/auth", authRouter);
 app.use("/", indexRouter);
 app.use("/v1", v1);
+app.use("/v2", v2);
 
 // 여기까지 왔으면 404..! !!!
 app.use((req, res, next) => {

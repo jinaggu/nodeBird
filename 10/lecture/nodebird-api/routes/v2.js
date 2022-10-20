@@ -1,14 +1,12 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-// deprecate 는 버전이 낮아 이제 사용안한다는 ? 그런 느낌
-const { verifyToken, deprecate } = require("./middlewares");
+
+const { verifyToken, apiLimiter } = require("./middlewares");
 const { Domain, User, Post, Hashtag } = require("../models");
 
 const router = express.Router();
-// 모든 라우터들이 공통적으로 사용하는 미들웨어는 이렇게 router.use로 넣어두면 된다.
-router.use(deprecate);
 
-router.post("/token", async (req, res) => {
+router.post("/token", apiLimiter, async (req, res) => {
   const { clientSecret } = req.body;
   try {
     const domain = await Domain.findOne({
@@ -49,11 +47,11 @@ router.post("/token", async (req, res) => {
   }
 });
 
-router.get("/test", verifyToken, (req, res) => {
+router.get("/test", verifyToken, apiLimiter, (req, res) => {
   res.json(req.decoded);
 });
 
-router.get("/posts/my", verifyToken, (req, res) => {
+router.get("/posts/my", verifyToken, apiLimiter, (req, res) => {
   Post.findAll({ where: { userId: req.decoded.id } })
     .then((posts) => {
       console.log(posts);
@@ -71,29 +69,34 @@ router.get("/posts/my", verifyToken, (req, res) => {
     });
 });
 
-router.get("/posts/hashtag/:title", verifyToken, async (req, res) => {
-  try {
-    const hashtag = await Hashtag.findOne({
-      where: { title: req.params.title },
-    });
-    if (!hashtag) {
-      return res.status(404).json({
-        code: 404,
-        message: "검색 결과가 없습니다",
+router.get(
+  "/posts/hashtag/:title",
+  verifyToken,
+  apiLimiter,
+  async (req, res) => {
+    try {
+      const hashtag = await Hashtag.findOne({
+        where: { title: req.params.title },
+      });
+      if (!hashtag) {
+        return res.status(404).json({
+          code: 404,
+          message: "검색 결과가 없습니다",
+        });
+      }
+      const posts = await hashtag.getPosts();
+      return res.json({
+        code: 200,
+        payload: posts,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        code: 500,
+        message: "서버 에러",
       });
     }
-    const posts = await hashtag.getPosts();
-    return res.json({
-      code: 200,
-      payload: posts,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      code: 500,
-      message: "서버 에러",
-    });
   }
-});
+);
 
 module.exports = router;
